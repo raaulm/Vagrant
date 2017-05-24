@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sed -i "11s/^/159.203.166.2 /" /etc/hosts
+sed -i "18s/^/159.203.166.2 /" /etc/cloud/templates/hosts.redhat.tmpl
+/etc/init.d/network restart
+exit
