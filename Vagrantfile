@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
 
-config.vm.define "teste" do |config|
+config.vm.define "master" do |config|
 		config.vm.box = "digital_ocean"
 		config.ssh.private_key_path = "~/.ssh/id_rsa"
 			config.vm.provider :digital_ocean do |provider|
@@ -11,6 +11,9 @@ config.vm.define "teste" do |config|
 				config.vm.provision "shell", inline: <<-SHELL
     
 				#!/bin/bash
+				
+				hostname="master1.cloud.com"
+				
 				echo "----------------------------"
 				echo "----- INSTALANDO NANO ------"
 				echo "----------------------------"
@@ -19,9 +22,12 @@ config.vm.define "teste" do |config|
 				echo "----- CONFIGURANDO O HOST ------"
 				echo "--------------------------------"
 				echo "NETWORKING=yes
-				HOSTNAME="teste.teste.com" 
+				HOSTNAME="$hostname" 
 				GATEWAY=192.168.1.1" > /etc/sysconfig/network
-				sed -i "11s/^/teste.teste.com/" /etc/hosts
+				sed -i "8s/^/::/" /etc/hosts
+				sed -i "11s/^/$hostname master/" /etc/hosts
+				sed -i "15s/^/::/" /etc/cloud/templates/hosts.redhat.tmpl
+				sed -i "18s/^/$hostname master/" /etc/cloud/templates/hosts.redhat.tmpl
 				sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
 				echo "----- Desabilitando o Selinux ------"
 				setenforce 0
@@ -41,8 +47,8 @@ config.vm.define "teste" do |config|
 				echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
 				echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
 				cat /sys/kernel/mm/transparent_hugepage/defrag
-				hostname teste.teste.com
-				echo "teste.teste.com" > /etc/hostname
+				hostname $hostname
+				echo "$hostname" > /etc/hostname
 				/etc/init.d/network restart
 				echo "--------------------------------------"
 				echo "----- DOWNLOAD CLOUDERA MANAGER ------"
@@ -61,7 +67,7 @@ config.vm.define "teste" do |config|
 				mv cloudera-cdh-5-0.x86_64.rpm?_ga=2.183832100.346032946.1495453787-1339592384.1495453787 cloudera-cdh-5-0.x86_64.rpm
 				sudo yum -y --nogpgcheck localinstall cloudera-cdh-5-0.x86_64.rpm
 				sudo yum clean all
-				sudo yum install avro-tools crunch flume-ng hadoop-hdfs-fuse hadoop-hdfs-nfs3 hadoop-httpfs hadoop-kms hbase-solr hive-hbase hive-webhcat hue-beeswax hue-hbase hue-impala hue-pig hue-plugins hue-rdbms hue-search hue-spark hue-sqoop hue-zookeeper impala impala-shell kite llama mahout oozie pig pig-udf-datafu search sentry solr-mapreduce spark-core spark-master spark-worker spark-history-server spark-python sqoop sqoop2 whirr
+				sudo yum -y install avro-tools crunch flume-ng hadoop-hdfs-fuse hadoop-hdfs-nfs3 hadoop-httpfs hadoop-kms hbase-solr hive-hbase hive-webhcat hue-beeswax hue-hbase hue-impala hue-pig hue-plugins hue-rdbms hue-search hue-spark hue-sqoop hue-zookeeper impala impala-shell kite llama mahout oozie pig pig-udf-datafu search sentry solr-mapreduce spark-core spark-master spark-worker spark-history-server spark-python sqoop sqoop2 whirr
 				sudo service cloudera-scm-server start
 				sudo service cloudera-scm-agent start
 				echo "--------------------------------"
