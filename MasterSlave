@@ -1,126 +1,119 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 Vagrant.configure("2") do |config|
 
-	config.vm.define "Master" do |config|
-		config.vm.box = "digital_ocean"
-		config.ssh.private_key_path = "~/.ssh/id_rsa"
-			config.vm.provider :digital_ocean do |provider|
-				provider.token = "token"
-				provider.image = "centOS-7-x64"
-				provider.region = "nyc3"
-				provider.size = "64gb"
-				config.vm.provision "shell", inline: <<-SHELL
-    
-				#!/bin/bash
-				echo "----------------------------"
-				echo "----- INSTALANDO NANO ------"
-				echo "----------------------------"
-				yum -y install nano
-				echo "--------------------------------"
-				echo "----- CONFIGURANDO O HOST ------"
-				echo "--------------------------------"
-				echo "NETWORKING=yes
-				HOSTNAME="teste.cloud.com" 
-				GATEWAY=192.168.1.1
-				hostname teste.cloud.com" > /etc/sysconfig/network
-				sed -i "11s/^/$1/" /etc/hosts
-				sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
-				echo "----- Desabilitando o Selinux ------"
-				setenforce 0
-				echo "Disable IPv6
-				net.ipv6.conf.all.disable_ipv6 = 1
-				net.ipv6.conf.default.disable_ipv6 = 1
-				net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
-				echo "NETWORKING_IPV6=no
-				IPV6INIT=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
-				systemctl disable firewalld
-				systemctl status firewalld
-				sysctl vm.overcommit_memory=1
-				echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
-				sysctl vm.swappiness=0
-				echo "vm_swappiness = 0" >> /etc/sysctl.conf
-				echo "echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"  >> /etc/rc.local
-				echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
-				echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
-				cat /sys/kernel/mm/transparent_hugepage/defrag
-				hostname teste.cloud.com
-				echo "teste.cloud.com" > /etc/hostname
-				/etc/init.d/network restart
-				echo "--------------------------------------"
-				echo "----- DOWNLOAD CLOUDERA MANAGER ------"
-				echo "--------------------------------------"
-				wget https://archive.cloudera.com/cm5/redhat/7/x86_64/cm/cloudera-manager.repo
-				cp cloudera-manager.repo /etc/yum.repos.d/
-				sudo yum -y install oracle-j2sdk1.7
-				sudo yum -y install cloudera-manager-daemons cloudera-manager-server
-				sudo yum -y install cloudera-manager-server-db-2
-				sudo service cloudera-scm-server-db start
-				sudo yum -y install cloudera-manager-agent cloudera-manager-daemons
-				wget https://archive.cloudera.com/cdh5/one-click-install/redhat/6/x86_64/cloudera-cdh-5-0.x86_64.rpm?_ga=2.112310791.2037118672.1494551311-58559413.1494551311
-				mv cloudera-cdh-5-0.x86_64.rpm?_ga=2.112310791.2037118672.1494551311-58559413.1494551311 cloudera-cdh-5-0.x86_64.rpm
-				sudo yum -y --nogpgcheck localinstall cloudera-cdh-5-0.x86_64.rpm
-				sudo rpm --import https://archive.cloudera.com/cdh5/redhat/5/x86_64/cdh/RPM-GPG-KEY-clouderaRed Hat/CentOS/Oracle 6
-				sudo yum clean all
-				sudo yum install avro-tools crunch flume-ng hadoop-hdfs-fuse hadoop-hdfs-nfs3 hadoop-httpfs hadoop-kms hbase-solr hive-hbase hive-webhcat hue-beeswax hue-hbase hue-impala hue-pig hue-plugins hue-rdbms hue-search hue-spark hue-sqoop hue-zookeeper impala impala-shell kite llama mahout oozie pig pig-udf-datafu search sentry solr-mapreduce spark-core spark-master spark-worker spark-history-server spark-python sqoop sqoop2 whirr
-				sudo service cloudera-scm-server start
-				sudo service cloudera-scm-agent start
-				echo "--------------------------------"
-				echo "----- CLOUDERA MANAGER UP ------"
-				echo "--------------------------------"
-				exit
-			SHELL
-		end
+SLAVE_COUNT = 3
+
+	config.vm.provider :digital_ocean do |slave|
+                slave.ssh.private_key_path = "~/.ssh/id_rsa"
+                slave.token = "token"
+                slave.image = "centOS-7-x64"
+                slave.region = "nyc3"
+                slave.size = "64gb"
 	end
 
-	config.vm.define "Slave" do |config|
-		config.vm.box = "digital_ocean"
-		config.ssh.private_key_path = "~/.ssh/id_rsa"
-			config.vm.provider :digital_ocean do |provider|
-				provider.token = "token"
-				provider.image = "centOS-7-x64"
-				provider.region = "nyc3"
-				provider.size = "64gb"
-				config.vm.provision "shell", inline: <<-SHELL
-    
-				#!/bin/bash
-				echo "----------------------------"
-				echo "----- INSTALANDO NANO ------"
-				echo "----------------------------"
-				yum -y install nano
-				echo "--------------------------------"
-				echo "----- CONFIGURANDO O HOST ------"
-				echo "--------------------------------"
-				echo "NETWORKING=yes
-				HOSTNAME="teste.cloud.com" 
-				GATEWAY=192.168.1.1
-				hostname teste.cloud.com" > /etc/sysconfig/network
-				sed -i "11s/^/$1/" /etc/hosts
-				sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
-				echo "----- Desabilitando o Selinux ------"
-				setenforce 0
-				echo "Disable IPv6
-				net.ipv6.conf.all.disable_ipv6 = 1
-				net.ipv6.conf.default.disable_ipv6 = 1
-				net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
-				echo "NETWORKING_IPV6=no
-				IPV6INIT=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
-				systemctl disable firewalld
-				systemctl status firewalld
-				sysctl vm.overcommit_memory=1
-				echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
-				sysctl vm.swappiness=0
-				echo "vm_swappiness = 0" >> /etc/sysctl.conf
-				echo "echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"  >> /etc/rc.local
-				echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
-				echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
-				cat /sys/kernel/mm/transparent_hugepage/defrag
-				hostname teste.cloud.com
-				echo "teste.cloud.com" > /etc/hostname
-				/etc/init.d/network restart
-				echo "--------------------------------"
-				echo "---------- HOST UP -------------"
-				echo "--------------------------------"
-				exit
-			SHELL
-		end
+	SLAVE_COUNT.times do |i|
+		slave_id = "slave#{i}"
+		config.vm.define slave_id do |slave|
+		slave.vm.box = "digital_ocean"
+		slave.ssh.private_key_path = "~/.ssh/id_rsa"
+		slave.vm.hostname = "#{slave_id}"
+		slave.vm.provision :shell, inline: <<-SHELL
+
+		#!/bin/bash
+
+		echo "----------------------------"
+		echo "----- INSTALANDO NANO ------"
+		echo "----------------------------"
+		yum -y install nano
+		echo "--------------------------------"
+		echo "----- CONFIGURANDO O HOST ------"
+		echo "--------------------------------"
+		echo "NETWORKING=yes
+		GATEWAY=192.168.1.1" > /etc/sysconfig/network
+		sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
+		echo "----- Desabilitando o Selinux ------"
+		setenforce 0
+		echo "Disable IPv6
+		net.ipv6.conf.all.disable_ipv6 = 1
+		net.ipv6.conf.default.disable_ipv6 = 1
+		net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+		echo "NETWORKING_IPV6=no
+		IPV6INIT=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+		systemctl disable firewalld
+		systemctl status firewalld
+		sysctl vm.overcommit_memory=1
+		echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+		sysctl vm.swappiness=0
+		echo "vm_swappiness = 0" >> /etc/sysctl.conf
+		echo "echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"  >> /etc/rc.local
+		echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
+		echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
+		cat /sys/kernel/mm/transparent_hugepage/defrag
+		/etc/init.d/network restart
+		SHELL
 	end
+end
+
+	config.vm.provider :digital_ocean do |master|
+		master.ssh.private_key_path = "~/.ssh/id_rsa"
+		master.token = "token"
+		master.image = "centOS-7-x64"
+		master.region = "nyc3"
+		master.size = "64gb"
+	end
+			
+	config.vm.define "master" do |master|
+		master.vm.box = "digital_ocean"
+		master.ssh.private_key_path = "~/.ssh/id_rsa"
+		master.vm.provision :shell, inline: <<-SHELL
+				
+		#!/bin/bash
+				
+		echo "----------------------------"
+		echo "----- INSTALANDO NANO ------"
+		echo "----------------------------"
+		yum -y install nano
+		echo "--------------------------------"
+		echo "----- CONFIGURANDO O HOST ------"
+		echo "--------------------------------"
+		echo "NETWORKING=yes 
+		GATEWAY=192.168.1.1" > /etc/sysconfig/network
+		sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
+		echo "----- Desabilitando o Selinux ------"
+		setenforce 0
+		echo "Disable IPv6
+		net.ipv6.conf.all.disable_ipv6 = 1
+		net.ipv6.conf.default.disable_ipv6 = 1
+		net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+		echo "NETWORKING_IPV6=no
+		IPV6INIT=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+		systemctl disable firewalld
+		systemctl status firewalld
+		sysctl vm.overcommit_memory=1
+		echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+		sysctl vm.swappiness=0
+		echo "vm_swappiness = 0" >> /etc/sysctl.conf
+		echo "echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"  >> /etc/rc.local
+		echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
+		echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
+		cat /sys/kernel/mm/transparent_hugepage/defrag
+		/etc/init.d/network restart
+		echo "--------------------------------------"
+		echo "----- DOWNLOAD CLOUDERA MANAGER ------"
+		echo "--------------------------------------"
+		wget https://archive.cloudera.com/cm5/redhat/7/x86_64/cm/cloudera-manager.repo
+		cp cloudera-manager.repo /etc/yum.repos.d/
+		sudo yum -y install oracle-j2sdk1.7
+		sudo yum -y install cloudera-manager-daemons cloudera-manager-server
+		sudo yum -y install cloudera-manager-server-db-2
+		sudo service cloudera-scm-server-db start
+		sudo service cloudera-scm-server start
+		echo "--------------------------------"
+		echo "----- CLOUDERA MANAGER UP ------"
+		echo "--------------------------------"
+		exit
+	SHELL
+   end
 end

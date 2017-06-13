@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sed -i "11s/^/xxx.xxx.xxx.x/" /etc/hosts
+sed -i "18s/^/xxx.xxx.xxx.x /" /etc/cloud/templates/hosts.redhat.tmpl
+/etc/init.d/network restart
+exit
