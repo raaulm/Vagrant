@@ -32,47 +32,47 @@ end
 	boxes.each do |opts|
 	config.vm.define opts[:name] do |config|
 	config.vm.hostname = opts[:name]
-	  config.vm.provision "shell", inline: <<-SHELL
+	config.vm.provision "shell", inline: <<-SHELL
     
-				#!/bin/bash
-				
-				hostname="testes.cloud.com"
-				
-				echo "----------------------------"
-				echo "----- INSTALANDO NANO ------"
-				echo "----------------------------"
-				yum -y install nano
-				echo "--------------------------------"
-				echo "----- CONFIGURANDO O HOST ------"
-				echo "--------------------------------"
-				echo "NETWORKING=yes
-				HOSTNAME="$hostname" 
-				GATEWAY=192.168.1.1" > /etc/sysconfig/network
-				sed -i "11s/^/$hostname/" /etc/hosts
-				sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
-				echo "----- Desabilitando o Selinux ------"
-				setenforce 0
-				echo "Disable IPv6
-				net.ipv6.conf.all.disable_ipv6 = 1
-				net.ipv6.conf.default.disable_ipv6 = 1
-				net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
-				echo "NETWORKING_IPV6=no
-				IPV6INIT=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
-				systemctl disable firewalld
-				systemctl status firewalld
-				sysctl vm.overcommit_memory=1
-				echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
-				sysctl vm.swappiness=0
-				echo "vm_swappiness = 0" >> /etc/sysctl.conf
-				echo "echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"  >> /etc/rc.local
-				echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
-				echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
-				cat /sys/kernel/mm/transparent_hugepage/defrag
-				hostname $hostname
-				echo "$hostname" > /etc/hostname
-				/etc/init.d/network restart
-				exit
-			SHELL
-		end
-	end
+	#!/bin/bash
+
+	hostname="testes.cloud.com"
+
+	echo "----------------------------"
+	echo "----- INSTALANDO NANO ------"
+	echo "----------------------------"
+	yum -y install nano
+	echo "--------------------------------"
+	echo "----- CONFIGURANDO O HOST ------"
+	echo "--------------------------------"
+	echo "NETWORKING=yes
+	HOSTNAME="$hostname" 
+	GATEWAY=192.168.1.1" > /etc/sysconfig/network
+	sed -i "11s/^/$hostname/" /etc/hosts
+	sed -i "92s/^/dummyuser ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers
+	echo "----- Desabilitando o Selinux ------"
+	setenforce 0
+	echo "Disable IPv6
+	net.ipv6.conf.all.disable_ipv6 = 1
+	net.ipv6.conf.default.disable_ipv6 = 1
+	net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+	echo "NETWORKING_IPV6=no
+	IPV6INIT=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+	systemctl disable firewalld
+	systemctl status firewalld
+	sysctl vm.overcommit_memory=1
+	echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+	sysctl vm.swappiness=0
+	echo "vm_swappiness = 0" >> /etc/sysctl.conf
+	echo "echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"  >> /etc/rc.local
+	echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag"  >> /etc/rc.local
+	echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"  >> /etc/rc.local
+	cat /sys/kernel/mm/transparent_hugepage/defrag
+	hostname $hostname
+	echo "$hostname" > /etc/hostname
+	/etc/init.d/network restart
+	exit
+      SHELL
+    end
+  end
 end
